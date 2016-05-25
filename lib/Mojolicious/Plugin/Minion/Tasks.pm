@@ -139,7 +139,7 @@ __END__
         my $c = shift;
 
         my $upload = $c->req->upload('file');
-        ) $upload->move_to('/tmp/temp.file');
+        $upload->move_to('/tmp/temp.file');
 
         $c->minion->enqueue(
             upload_picture => [ filename => '/tmp/temp.file' ]
