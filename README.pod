@@ -1,0 +1,102 @@
+=pod
+
+=encoding UTF-8
+
+=head1 NAME
+
+Mojolicious::Plugin::Minion::Tasks - Auto-register Minion tasks from modules by provided namespace
+
+=head1 SYNOPSIS
+
+    # In your app.pl
+    use Mojolicious::Lite;
+
+    plugin 'Minion'        => {...};
+    plugin 'Minion::Tasks' => {
+        namespace         => 'MyApp::Task',
+        task_defaults     => {},
+        'Upload::Picture' => {
+            quality => 95,
+            resize  => '2048x2048'
+        },
+    };
+
+    post '/upload/image' => sub {
+        my $c = shift;
+
+        my $upload = $c->req->upload('file');
+        ) $upload->move_to('/tmp/temp.file');
+
+        $c->minion->enqueue(
+            upload_picture => [ filename => '/tmp/temp.file' ]
+        );
+
+        $self->render( json => { status => 'queued' } );
+    };
+
+
+
+    # In MyApp/Task/Upload/Picture.pm
+    package MyApp::Task::Upload::Picture;
+    use Mojo::Base -base;
+
+    has [qw(app config)];
+
+    sub name {'first_second'}
+
+    sub process {
+        my ( $self, $job, %args ) = @_;
+
+        my $filename = $args{filename};
+
+        # do something with file
+    }
+
+    1;
+
+=head1 DESCRIPTION
+
+Allow you to define and auto register Minion tasks from your task modules.
+
+All tasks needs configuration which could be provided via L<default config|/task_defaults>
+or per-task config.
+
+Per-task configuration provided via HASH:
+
+    Task::Module => {
+        key => value,
+        ...
+    }
+
+If Task::Module presents in several namespaces, it is possible to provide
+config per namespace:
+
+    namespace => ['MyApp::Task', 'OtherApp::Task', 'AnotherOne']
+    'File::Upload' => {
+        'MyApp::Task'    => { ... },
+        'OtherApp::Task' => { ... },
+
+        default_key => default_value,
+        ...
+    }
+    # Here AnotherOne::File::Upload will get next config:
+    # {
+    #   'MyApp::Task'    => { ... },
+    #   'OtherApp::Task' => { ... },
+    #
+    #   default_key => default_value,
+    #   ...
+    # }
+
+=head1 AUTHOR
+
+Dmitry "dim0xff" Latin <dim0xff@gmail.com>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2016 by Dmitry Latin.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
