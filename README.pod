@@ -47,9 +47,14 @@ Mojolicious::Plugin::Minion::Tasks - Auto-register Minion tasks from modules by 
     sub process {
         my ( $self, $job, %args ) = @_;
 
-        my $filename = $args{filename};
+        my $image = somehow_read_image_file( $args{filename} );
 
-        # do something with file
+        $image->resize_to(   $self->config->{resize}  );
+        $image->set_quality( $self->config->{quality} );
+
+        # ...
+
+        $job->finish;
     }
 
     1;
@@ -58,17 +63,17 @@ Mojolicious::Plugin::Minion::Tasks - Auto-register Minion tasks from modules by 
 
 Allow you to define and auto register Minion tasks from your task modules.
 
-All tasks needs configuration which could be provided via L<default config|/task_defaults>
+Each task needs configuration which could be provided via L<default config|/task_defaults>
 or per-task config.
 
-Per-task configuration provided via HASH:
+Per-task configuration could be provided via HASH:
 
     Task::Module => {
         key => value,
         ...
     }
 
-If Task::Module presents in several namespaces, it is possible to provide
+If C<Task::Module> presents in several namespaces, it is possible to provide
 config per namespace:
 
     namespace => ['MyApp::Task', 'OtherApp::Task', 'AnotherOne']
