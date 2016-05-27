@@ -161,9 +161,14 @@ __END__
     sub process {
         my ( $self, $job, %args ) = @_;
 
-        my $filename = $args{filename};
+        my $image = somehow_read_image_file( $args{filename} );
 
-        # do something with file
+        $image->resize_to(   $self->config->{resize}  );
+        $image->set_quality( $self->config->{quality} );
+
+        # ...
+
+        $job->finish;
     }
 
     1;
@@ -172,18 +177,18 @@ __END__
 
 Allow you to define and auto register Minion tasks from your task modules.
 
-All tasks needs configuration which could be provided via L<default config|/task_defaults>
+Each task need configuration which could be provided via L<default config|/task_defaults>
 or per-task config.
 
-Per-task configuration provided via HASH:
+Per-task configuration could be provided via HASH:
 
     Task::Module => {
         key => value,
         ...
     }
 
-If Task::Module presents in several namespaces, it is possible to provide
-config per namespace:
+If C<Task::Module> presents in multiple namespaces, it is possible to provide
+configuration per-namespace:
 
     namespace => ['MyApp::Task', 'OtherApp::Task', 'AnotherOne']
     'File::Upload' => {
